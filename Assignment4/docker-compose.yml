@@ -1,0 +1,22 @@
+
+
+services:
+  web1:
+    image: httpd:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./web1:/usr/local/apache2/htdocs
+
+  web2:
+    image: httpd:2
+    ports:
+      - "81:80"
+    volumes:
+      - ./web2:/usr/local/apache2/htdocs 
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
