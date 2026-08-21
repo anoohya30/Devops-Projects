@@ -1,0 +1,33 @@
+---
+- name: Deploy secure AWS infrastructure
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections: [ amazon.aws ]
+  vars_files: [ vars.yml ]
+
+  tasks:
+    - name: Create core VPC network infrastructure
+      amazon.aws.ec2_vpc_net:
+        name: "{{ vpc_name }}"
+        cidr_block: "{{ vpc_cidr }}"
+        region: "{{ aws_region }}"
+        dns_support: true
+        dns_hostnames: true
+      register: vpc
+
+    - name: Create and attach Internet Gateway
+      amazon.aws.ec2_vpc_igw:
+        vpc_id: "{{ vpc.vpc.id }}"
+        region: "{{ aws_region }}"
+        tags:
+          Name: "{{ internet_gateway_name }}"
+        state: present
+      register: internet_gateway
+
+    - name: Provision network subnets, routes, and security groups
+      include_tasks: "{{ item }}"
+      loop:
+        - network.yml
+        - launch_instances.yml
+     

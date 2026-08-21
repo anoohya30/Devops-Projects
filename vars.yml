@@ -1,0 +1,48 @@
+---
+# AWS configuration
+aws_region: eu-west-2
+
+# VPC configuration
+vpc_name: secure-ansible-vpc
+vpc_cidr: 10.0.0.0/16
+
+# Subnets
+public_subnet_name: public-subnet
+public_subnet_cidr: 10.0.1.0/24
+
+private_subnet_name: private-subnet
+private_subnet_cidr: 10.0.2.0/24
+
+# Availability Zone
+availability_zone: eu-west-2a
+
+# Internet Gateway
+internet_gateway_name: secure-ansible-igw
+
+# Route tables
+public_route_table_name: public-route-table
+private_route_table_name: private-route-table
+
+# Security groups
+public_security_group_name: public-ec2-sg
+private_security_group_name: private-ec2-sg
+
+# Trusted SSH source
+# CHANGE THIS to my own trusted public IP/CIDR.
+trusted_ssh_cidr: "own trusted public IP"
+
+# EC2 configuration
+public_instance_name: public-admin-server
+private_instance_name: private-internal-server
+
+public_instance_type: t3.micro
+private_instance_type: t3.micro
+
+# Amazon Linux 2023 AMI for eu-west-2.
+
+ami_id: ami-06f9e3b45a89cf4aa
+
+# SSH key pair already existing in AWS
+key_name: Ansible
+
+

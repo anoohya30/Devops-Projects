@@ -1,0 +1,25 @@
+---
+- name: Launch EC2 instances
+  amazon.aws.ec2_instance:
+    name: "{{ item.name }}"
+    region: "{{ aws_region }}"
+    image_id: "{{ ami_id }}"
+    instance_type: "{{ item.type }}"
+    key_name: "{{ key_name }}"
+    vpc_subnet_id: "{{ subnets.results[item.idx].subnet.id }}"
+    security_group: "{{ item.public | ternary(public_sg.group_id, private_sg.group_id) }}"
+    network: { assign_public_ip: "{{ item.public }}" }
+    tags: { Name: "{{ item.name }}", Environment: production, Network: "{{ item.net_type }}", ManagedBy: Ansible }
+  loop:
+  - name: "{{ public_instance_name }}"
+    type: "{{ public_instance_type }}"
+    idx: 0
+    public: true
+    net_type: public
+
+  - name: "{{ private_instance_name }}"
+    type: "{{ private_instance_type }}"
+    idx: 1
+    public: false
+    net_type: private
+

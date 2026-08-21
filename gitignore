@@ -1,0 +1,38 @@
+# --- SSH keys / credentials ---
+*.pem
+*.key
+*.ppk
+*.crt
+id_rsa*
+Ansible.pem
+
+# --- AWS / cloud credentials ---
+.aws/
+aws_credentials
+credentials.yml
+*credentials*.json
+
+# --- Environment / secret variable files ---
+.env
+.env.*
+*.env
+secrets.yml
+vault.yml
+*vault_pass*
+
+# --- Ansible specific ---
+*.retry
+.vault_pass
+ansible.log
+
+# --- Python (if any local scripts/venvs) ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- OS / editor junk ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

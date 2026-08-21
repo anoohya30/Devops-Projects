@@ -1,0 +1,73 @@
+---
+- name: Build subnets
+  amazon.aws.ec2_vpc_subnet:
+    vpc_id: "{{ vpc.vpc.id }}"
+    cidr: "{{ item.cidr }}"
+    az: "{{ availability_zone }}"
+    region: "{{ aws_region }}"
+    map_public: "{{ item.public }}"
+    tags:
+      Name: "{{ item.name }}"
+      Network: "{{ item.type }}"
+  loop:
+    - cidr: "{{ public_subnet_cidr }}"
+      public: true
+      name: "{{ public_subnet_name }}"
+      type: public
+    - cidr: "{{ private_subnet_cidr }}"
+      public: false
+      name: "{{ private_subnet_name }}"
+      type: private
+  register: subnets
+
+- name: Build route tables
+  amazon.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc.vpc.id }}"
+    region: "{{ aws_region }}"
+    tags:
+      Name: "{{ item.name }}"
+    subnets:
+      - "{{ subnets.results[item.idx].subnet.id }}"
+    routes: "{{ item.routes | default(omit) }}"
+  loop:
+    - name: "{{ public_route_table_name }}"
+      idx: 0
+      routes:
+        - dest: "0.0.0.0/0"
+          gateway_id: "{{ internet_gateway.gateway_id }}"
+    - name: "{{ private_route_table_name }}"
+      idx: 1
+
+- name: Build public security group
+  amazon.aws.ec2_security_group:
+    name: "{{ public_security_group_name }}"
+    description: "SSH Admin"
+    vpc_id: "{{ vpc.vpc.id }}"
+    region: "{{ aws_region }}"
+    rules:
+      - proto: tcp
+        ports:
+          - 22
+        cidr_ip: "{{ trusted_ssh_cidr }}"
+        rule_desc: "SSH from trusted IP range"
+    rules_egress:
+      - proto: all
+        cidr_ip: "0.0.0.0/0"
+  register: public_sg
+
+- name: Build private security group
+  amazon.aws.ec2_security_group:
+    name: "{{ private_security_group_name }}"
+    description: "SSH Private"
+    vpc_id: "{{ vpc.vpc.id }}"
+    region: "{{ aws_region }}"
+    rules:
+      - proto: tcp
+        ports:
+          - 22
+        group_id: "{{ public_sg.group_id }}"
+        rule_desc: "SSH only from public EC2 security group"
+    rules_egress:
+      - proto: all
+        cidr_ip: "0.0.0.0/0"
+  register: private_sg
